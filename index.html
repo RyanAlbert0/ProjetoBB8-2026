@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamban - BB8</title>
+</head>
+<body>
+    <main>
+        <div id="sidePannel">
+            <div class="title">
+                <img src="" alt="">
+            </div>
+            <div class="content">
+                <button class="selectButton" onclick="selectTab(0)">A Fazer</button>
+                <button class="selectButton" onclick="selectTab(1)">Fazendo</button>
+                <button class="selectButton" onclick="selectTab(2)">Feito</button>
+                <button class="selectButton" onclick="selectTab(3)">Ideias</button>
+            </div>
+        </div>
+        <div id="centerPannel">
+            <div class="title">
+                <h1 id="titleTab">Kamban - (template)</h1>
+            </div>
+            <table id="data">
+                <tr>
+                    <td>
+                        <input type="text" placeholder="Insira aqui sua ideia">
+                        <button>Adicionar</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </main>
+
+    <script>
+
+        window.onload
+        {
+            const tabs = ['toDo', 'doing', 'done', 'ideas']
+                tabs.forEach(element => {
+                    if(localStorage.getItem(element) == '')
+                    {
+                        localStorage.setItem(element, '')
+                    }
+                });
+            }
+
+        function selectTab(tab)
+        {
+            const title = document.getElementById('titleTab')
+            const data = document.getElementById('data')
+
+            data.innerHTML = ''
+            const defaultData = document.createElement('tr')
+
+            var input = document.createElement('input')
+            input.placeholder = 'Insira o dado aqui'
+            input.id = 'dataInput'
+
+
+            var addDataBTN = document.createElement('button')
+            addDataBTN.textContent = "Enviar"
+            addDataBTN.addEventListener('click', addData)
+
+            array = [input, addDataBTN]
+            
+            array.forEach(element => defaultData.appendChild(element));
+
+            data.appendChild(defaultData)
+
+            switch (tab)
+            {
+                case 0:
+                {
+                    title.textContent = "Kamban - A Fazer"
+                    sessionStorage.setItem('tab', 'toDo')
+                    break
+                }
+
+                case 1:
+                {
+                    title.textContent = "Kamban - Fazendo"
+                    sessionStorage.setItem('tab', 'doing')
+                    break
+                }
+
+                case 2:
+                {
+                    title.textContent = "Kamban - Feito"
+                    sessionStorage.setItem('tab', 'done')
+                    break
+                }
+
+                case 3:
+                {
+                    title.textContent = "Kamban - Ideias"
+                    sessionStorage.setItem('tab', 'ideas')
+                    break
+                }
+            }
+        }
+
+        function addData()
+        {
+            const dataInput = document.getElementById('dataInput')
+            const tab = sessionStorage.getItem('tab')
+            console.log(dataInput.value)
+
+            if(localStorage.getItem(tab) != '')
+            {
+                var tempData = JSON.parse(localStorage.getItem(tab))
+                tempData.push(dataInput.value)
+                var data = JSON.stringify(tempData)
+                localStorage.setItem(tab, data)
+                console.log('Os dados foram atualizados')
+            }
+            else
+            {
+                var tempData = []
+                tempData.push(dataInput.value)
+                var data = JSON.stringify(tempData)
+                localStorage.setItem(tab, data)
+                console.log('Os dados foram criados')
+            }
+
+        }
+    </script>
+</body>
+</html>
