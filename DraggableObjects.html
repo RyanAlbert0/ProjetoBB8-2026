@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <main>
+        <div id="sidePannel">
+            <div class="title">
+                <h1 id="SidePannelTitle">Opções - </h1>
+            </div>
+            <div class="content">
+                <button class="optionBTN" id="ToDoBTN" onclick="loadCard('ToDo')"> A Fazer</button>
+                <button class="optionBTN" id="DoingBTN" onclick="loadCard('Doing')"> Fazendo</button>
+                <button class="optionBTN" id="DoneBTN" onclick="loadCard('Done')"> Feito</button>
+                <button class="optionBTN" id="IdeaBTN" onclick="loadCard('Idea')"> Ideias</button>
+                <div class="toggles">
+                    <div id="go-card-div">
+                        <label class="inputTitle">Go with Card</label>
+                        <input type="checkbox" id="go-card">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="center">
+            <div class="canvas_container" id="canvasContainer">
+                <div class="canvas_content" id="canvasContent">
+                </div>
+            </div>
+            <button class="addBTN" id="addBTN" onclick="openEditor()">+</button>
+        </div>
+        <div id="addCardPopup" class="addCardPopup">
+            <div class="title">
+                <h2>Add a Card</h2>
+            </div>
+            <div class="popupContainer">
+                <!-- Card Title -->
+                <div class="popupSeparator">
+                    <label class="inputTitle">Card Name</label>
+                    <input class="userInput" type="text" id="cardName" class="cardInput" placeholder="Insert the Card name here.">
+                </div>
+                <!-- Card Content -->
+                <div class="popupSeparator">
+                    <label class="inputTitle">Card Content</label>
+                    <input type="text" id="cardContent" placeholder="Insert the Card content here.">
+                </div>
+                <!-- Card Color -->
+                 <div class="popupSeparator">
+                    <label class="inputTitle">Card Color</label>
+                    <select class="userSelect" id="cardColor">
+                        <option value="Blue">Blue</option>
+                        <option value="Green">Green</option>
+                        <option value="Red">Red</option>
+                        <option value="Yellow">Yellow</option>
+                    </select>
+                 </div>
+            </div>
+            <button id="createCard" onclick="createCard()">Create Card</button>
+        </div>
+    </main>
+
+<style>
+
+*{
+
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.canvas_container
+{
+    width: 60vw;
+    height: 80vh;
+    overflow: hidden;
+    background-color: lightgray;
+    position: relative;
+    cursor: grab;
+}
+
+.canvas_container:active
+{
+    cursor: grabbing
+}
+
+.canvas_content
+{
+    position: absolute;
+    width: 5000px;
+    height: 50000px;
+    transform-origin: 0 0;
+    background-image: radial-gradient(#ccc 1px, transparent 1px);
+    background-size: 20px 20px;
+    transform-origin: 0, 0;
+}
+
+.draggable
+{
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: 330px;
+    height: 180px;
+    overflow-y: auto;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    background-color: yellow;
+    border-radius: 10px;
+    user-select: none;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.objectHeader
+{
+    height: auto;
+    margin: 20px 0px;
+    padding: 0;
+    background-color: rgba(255, 255, 255, 0.479);
+
+}
+
+.addCardPopup {
+
+    display: flex;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    z-index: -1;
+    align-items: center;
+    justify-content: center;
+}
+
+.addCardPopup.open {
+    opacity: 1;
+    z-index: 5;
+}
+
+.classButtons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.buttons {
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+    margin-top: 70px;
+}
+
+.buttons .changeBTN {
+    background-color: transparent;
+    border: none;
+}
+
+.Red {
+    background-color: rgb(255, 136, 136);
+}
+
+.Yellow {
+    background-color: rgb(252, 252, 184);
+}
+
+.Green {
+    background-color: rgb(179, 255, 179);
+}
+
+.Blue {
+    background-color: rgb(145, 145, 255);
+}
+
+</style>
+
+<script>
+
+/* 
+    Modes:
+    0 - ToDo,
+    1 - Doing,
+    2 - Made,
+    3 - Idea
+*/ 
+
+const goCard = document.getElementById('go-card')
+
+window.addEventListener('load', (event) => 
+{
+
+    const toDo = localStorage.getItem('ToDo') || localStorage.setItem('ToDo', '{}')
+    const Doing = localStorage.getItem('Doing') || localStorage.setItem('Doing', '{}')
+    const Done = localStorage.getItem('Done') || localStorage.setItem('Done', '{}')
+    const Idea = localStorage.getItem('Idea') || localStorage.setItem('Idea', '{}')
+
+    loadCard('Idea')
+
+})
+
+function openEditor()
+{
+    // Boolean for sendButton listener
+    let isAdded = false
+
+    // Enable the sendButton
+    const sendButton = document.getElementById('createCard')
+    const editor = document.getElementById('addCardPopup')
+    editor.classList.add('open')
+}
+
+function createCard()
+{
+    let index = Date.now()
+    console.log(index)
+
+    const editor = document.getElementById('addCardPopup')
+
+    let name = document.getElementById('cardName').value
+    let content = document.getElementById('cardContent').value
+    let color = document.getElementById('cardColor').value
+
+    cardName = ''
+    cardContent = ''
+
+    editor.classList.remove('open')
+
+    saveCard(index, name, content, 100, 100, color, 'Idea')
+    
+    if(goCard.checked)
+    {
+        addCard(index, name, content, 100, 100, color, 'Idea')
+        loadCard('Idea')
+    }
+    console.log(index)
+}
+
+function loadCard(selMode)
+{
+    document.getElementById('SidePannelTitle').innerText = `Opções - ${selMode}`
+    clearScreen()
+
+    const cards = JSON.parse(localStorage.getItem(selMode))
+    for (const [id, card] of Object.entries(cards))
+    {
+        console.log(card)
+        const cardProp = Object.entries(card)
+        console.log(cardProp)
+
+        const name = cardProp[0][1]
+        const content = cardProp[1][1]
+        const posX = cardProp[2][1]
+        const posY = cardProp[3][1]
+        const color = cardProp[4][1]
+        
+        console.log(`${id}, ${name}, ${content}, ${posX}, ${posY}, ${color}, ${selMode}`)
+        addCard(id, name, content, posX, posY, color, selMode)
+    }
+
+}
+
+function saveCard(index, cardName, cardContent, posX, posY, color, selMode)
+{
+    let data = JSON.parse(localStorage.getItem(selMode))
+    console.log(data)
+
+    console.log(`Salvando em: ${selMode}`)
+    console.log(`ID: ` + index)
+
+    data[index] = {
+        'name': cardName,
+        'content': cardContent,
+        'posX': posX,
+        'posY': posY,
+        'color': color,
+        'mode': selMode
+
+    }
+
+    localStorage.setItem(selMode, JSON.stringify(data))
+}
+
+function removeCard(index, selMode)
+{
+    let base = document.getElementById(index)
+    let removeCards = JSON.parse(localStorage.getItem(selMode))
+    delete removeCards[index]
+    localStorage.setItem(selMode, JSON.stringify(removeCards))
+    console.log('Cartão removido')
+    base.remove()
+}
+
+function addCard(index, cardName, cardContent, posX, posY, color, selMode)
+{
+    // Make the card ID the date of creating, removing the necessity of random or sequential IDs
+    
+    let base = document.createElement('div')
+    base.id = index
+    base.classList.add('draggable')
+    base.classList.add(color)
+
+    base.innerHTML = `
+    <div id='${index}-header' class='objectHeader'> ${cardName} </div>
+    <p id='${index}-content'>${cardContent}.</p>
+    <div class='buttons'>
+        <button class='delBTN'>Erase</button>
+    </div>
+    `
+    
+    const delBTN = base.querySelector('.delBTN')
+    const previous = base.querySelector('.previous')
+    const next = base.querySelector('.next')
+    
+
+
+
+    delBTN.addEventListener('mousedown', (e) =>{
+        e.stopPropagation();
+    })
+    
+    delBTN.addEventListener('click', () => {
+
+        removeCard(index, selMode)
+
+    })
+    
+
+    document.getElementById('canvasContent').appendChild(base)
+
+
+    base.style.left = posX + 'px'
+    base.style.top = posY + 'px'
+    dragElement(base, selMode)
+
+}
+
+function clearScreen() 
+{
+    const screen = document.getElementById('canvasContent')
+    screen.innerHTML = ''
+    console.log('A tela foi limpa')
+}
+
+// The 'window'
+const container = document.getElementById('canvasContainer')
+
+// The content behind the 'window'
+const content = document.getElementById('canvasContent')
+
+// Zoom scale
+let scale = 1
+
+// Horizontal distance moved by the 'window'
+let pannedX = 0
+
+// Vertical distance moved by the 'window'
+let pannedY = 0
+
+// If the 'window' is being dragged or not
+let isPanning = false
+
+// Mouse position
+let startX, startY
+
+container.addEventListener('wheel', (e) => 
+{
+    if (e.target !== container && e.target !== content) return
+    e.preventDefault()
+
+    // Get the size of the 'window'
+    const rect = container.getBoundingClientRect()
+
+    // Define the mouse position through the client window and the container 'window'
+    const mouseX = e.clientX - rect.left
+    const mouseY = e.clientY - rect.top
+
+    // Define the scene position through math operations with mouse position, container position and zoom scale
+    const sceneX = (mouseX - pannedX) / scale
+    const sceneY = (mouseY - pannedY) / scale
+
+    
+    const zoomFactor = 0.1
+    // Zoom Jump
+    if (e.deltaY < 0)
+    {
+        scale += zoomFactor
+    }
+    else
+    {
+        scale -= zoomFactor
+    }
+
+    // Define the min scale (20%) and max scale (300%)
+    scale = Math.min(Math.max(0.2, scale), 3)
+
+    // Define the container position with the values of mouse, scene and zoom scale
+    pannedX = mouseX - sceneX * scale
+    pannedY = mouseY - sceneY * scale
+
+    updateTransform()
+    {passive: false}
+    
+})
+
+container.addEventListener('mousedown', (e) => {
+    if (e.target !== container && e.target !== content) return
+
+    isPanning = true
+    startX = e.clientX - pannedX
+    startY = e.clientY - pannedY
+})
+
+container.addEventListener('mousemove', (e) => {
+    if (!isPanning) return
+    pannedX = e.clientX - startX
+    pannedY = e.clientY - startY
+
+    updateTransform()
+})
+
+container.addEventListener('mouseup', (e) => {
+    isPanning = false
+})
+
+function updateTransform() {
+    content.style.transform = `translate(${pannedX}px, ${pannedY}px) scale(${scale})`
+    content.style.transform = `origin(${startX}, ${startY})`
+}
+
+document.querySelectorAll('.draggable').forEach(elmnt => {
+
+    dragElement(elmnt)
+
+})
+
+function dragElement(elmnt, selMode) {
+
+    let fPosX = 0
+    let fPosY = 0
+    let isChanging = false
+    let newMode
+
+    var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0
+    let header = document.getElementById(elmnt.id + '-header')
+    if (header)
+    {
+        header.onmousedown = dragMouseDown; 
+    }
+    else
+    {
+        elmnt.onmousedown = dragMouseDown
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event
+        e.preventDefault()
+        pos3 = e.clientX
+        pos4 = e.clientY
+        document.onmouseup = () => closeDragElement(selMode)
+
+        document.onmousemove = elementDrag
+    }
+
+    function elementDrag(e)
+    {
+        e = e || window.event
+        e.preventDefault()
+        pos1 = pos3 - e.clientX
+        pos2 = pos4 - e.clientY
+        pos3 = e.clientX
+        pos4 = e.clientY
+
+        posX = pos1 / scale
+        posY = pos2 / scale
+
+        elmnt.style.top = (elmnt.offsetTop - posY) + 'px'
+        elmnt.style.left = (elmnt.offsetLeft - posX) + 'px'
+
+        fPosX = elmnt.offsetLeft - posX
+        fPosY = elmnt.offsetTop - posY
+
+        elmnt.style.display = 'none'
+        let elmntA = document.elementFromPoint(e.clientX, e.clientY)
+        elmnt.style.display = 'flex'
+
+        if (elmntA)
+        {
+            let index = elmnt.id
+            let data = JSON.parse(localStorage.getItem(selMode))
+
+            const TDBTN = elmntA.closest('#ToDoBTN')
+            const DBTN = elmntA.closest('#DoingBTN')
+            const DOBTN = elmntA.closest('#DoneBTN')
+            const IBTN = elmntA.closest('#IdeaBTN')
+
+            if (TDBTN)
+            {
+                console.log('Em cima de To Do')
+                newMode = 'ToDo'
+                isChanging = true
+            }
+            else if (DBTN)
+            {
+                console.log('Em cima de Doing')
+                newMode = 'Doing'
+                isChanging = true
+            }
+            else if (DOBTN)
+            {
+                console.log('Em cima de Done')
+                newMode = 'Done'
+                isChanging = true
+            }
+            else if (IBTN)
+            {
+                console.log('Em cima de Idea')
+                newMode = 'Idea'
+                isChanging = true
+            }
+            else
+            {
+                isChanging = false
+                console.log(selMode)
+            }
+        
+        }
+        else
+        {
+            console.log('Nenhum botão encontrado')
+            isChanging = false
+        }
+
+    }
+
+    function closeDragElement(selMode)
+    {
+        document.onmouseup = null
+        document.onmousemove = null
+        
+        let index = elmnt.id
+        console.log(fPosX)
+        let data = JSON.parse(localStorage.getItem(selMode)[index])
+
+        if (isChanging)
+        {
+            console.log(data)
+            data[index]['selMode'] = newMode
+            localStorage.setItem(newMode, JSON.stringify(data))
+            removeCard(index, selMode)
+            isChanging = false
+            if (goCard.checked)
+            {
+                loadCard(newMode)
+            }
+        }
+        else
+        {
+            data[index]['posX'] = fPosX
+            data[index]['posY'] = fPosY
+            localStorage.setItem(selMode, JSON.stringify(data))
+        }
+    }
+
+
+}
+
+
+
+
+</script>
+
+</body>
+</html>

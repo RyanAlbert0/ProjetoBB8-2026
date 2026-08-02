@@ -20,13 +20,13 @@
         </div>
         <div id="centerPannel">
             <div class="title">
-                <h1 id="titleTab">Kamban - (template)</h1>
+                <h1 id="titleTab">Kamban - A Fazer</h1>
             </div>
             <table id="data">
                 <tr>
                     <td>
-                        <input type="text" placeholder="Insira aqui sua ideia">
-                        <button>Adicionar</button>
+                        <input type="text" id="dataInput" placeholder="Insira aqui sua ideia">
+                        <button onclick="addData()">Enviar</button>
                     </td>
                 </tr>
             </table>
@@ -35,28 +35,43 @@
 
     <script>
 
+        var table = document.getElementById('data')
+
         window.onload
         {
             const tabs = ['toDo', 'doing', 'done', 'ideas']
-                tabs.forEach(element => {
-                    if(localStorage.getItem(element) == '')
-                    {
-                        localStorage.setItem(element, '')
-                    }
-                });
-            }
+            tabs.forEach(element => {
+                if(localStorage.getItem(element) == ('' || null))
+                {
+                    localStorage.setItem(element, '')
+                }
+            });
+            sessionStorage.setItem('tab', 'toDo')
+            selectTab('toDo')
+        }
+
+        
 
         function selectTab(tab)
         {
             const title = document.getElementById('titleTab')
-            const data = document.getElementById('data')
 
-            data.innerHTML = ''
+            table.innerHTML = ''
             const defaultData = document.createElement('tr')
 
             var input = document.createElement('input')
             input.placeholder = 'Insira o dado aqui'
             input.id = 'dataInput'
+            input.addEventListener('keydown', (event) =>
+            {
+                const keyname = event.key
+                if(keyname === 'Enter')
+                {
+                    addData()
+                }
+
+            }
+            )
 
 
             var addDataBTN = document.createElement('button')
@@ -67,7 +82,7 @@
             
             array.forEach(element => defaultData.appendChild(element));
 
-            data.appendChild(defaultData)
+            table.appendChild(defaultData)
 
             switch (tab)
             {
@@ -75,6 +90,7 @@
                 {
                     title.textContent = "Kamban - A Fazer"
                     sessionStorage.setItem('tab', 'toDo')
+                    loadData()
                     break
                 }
 
@@ -103,26 +119,100 @@
 
         function addData()
         {
-            const dataInput = document.getElementById('dataInput')
+            const dataInput = document.getElementById('dataInput').value
             const tab = sessionStorage.getItem('tab')
             console.log(dataInput.value)
 
-            if(localStorage.getItem(tab) != '')
+            masterData = document.getElementById('data')
+
+            if (dataInput == '')
             {
-                var tempData = JSON.parse(localStorage.getItem(tab))
-                tempData.push(dataInput.value)
-                var data = JSON.stringify(tempData)
-                localStorage.setItem(tab, data)
-                console.log('Os dados foram atualizados')
+                console.log(`${dataInput} não é uma entrada válida`)
             }
             else
             {
-                var tempData = []
-                tempData.push(dataInput.value)
-                var data = JSON.stringify(tempData)
-                localStorage.setItem(tab, data)
-                console.log('Os dados foram criados')
+                var index = JSON.parse(localStorage.getItem(tab)).length
+
+                if(localStorage.getItem(tab) != '')
+                {
+                    var tempData = JSON.parse(localStorage.getItem(tab))
+                    tempData.push(dataInput)
+                    var data = JSON.stringify(tempData) 
+                    localStorage.setItem(tab, data)
+                    console.log('Os dados foram atualizados')
+                }
+                else
+                {
+                    var tempData = []
+                    tempData.push(dataInput)
+                    var data = JSON.stringify(tempData)
+                    localStorage.setItem(tab, data)
+                    console.log('Os dados foram criados')
+                }
+
+
+                appendData(dataInput, index, tab)
+
+        }
+        }
+    
+        function loadData()
+        {
+
+            tab = sessionStorage.getItem('tab')
+            if(tab == '')
+            {
+                pass
             }
+            else
+            {
+                var data = JSON.parse(localStorage.getItem(tab))
+                
+                data.forEach((tempData, index) => {
+
+                    appendData(tempData, index, tab)
+
+                });
+            }
+        }
+
+        function clearItself(index)
+        {
+            tab = sessionStorage.getItem('tab')
+            data = JSON.parse(localStorage.getItem(tab))
+            data.splice(index, 1)
+            localStorage.setItem(tab, JSON.stringify(data))
+
+            info = document.getElementById(`info${index}`)
+            info.remove()
+
+        }
+
+        function appendData(data, index, tab)
+        {
+            var info = document.createElement('tr')
+            info.class = 'info'
+            info.id = `info${index}`
+
+            var text = document.createElement('p')
+            text.textContent = data
+
+            // DEBUG
+            var debug = document.createElement('p')
+            debug.id = index
+            debug.textContent = `ID: ${index}` 
+            // debug.style = 'display: none'
+
+            var deleteBTN = document.createElement('button')
+            deleteBTN.class = 'delBTN'
+            deleteBTN.textContent = 'X'
+            deleteBTN.addEventListener('click', event => { clearItself(index) })
+            
+            var child = [text, debug, deleteBTN]
+            child.forEach(element => {info.appendChild(element)})
+
+            table.appendChild(info)
+            console.log('Data: ' + data + ' | Index: ' + index)
 
         }
     </script>
